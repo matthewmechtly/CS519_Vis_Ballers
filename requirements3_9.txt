@@ -1,8 +1,8 @@
 # packages in environment at /home/mmechtly/miniconda3/envs/CS519_proj:
 #
 # Name                    Version                   Build  Channel
-_libgcc_mutex             0.1                        main  
-_openmp_mutex             4.5                       1_gnu  
+# _libgcc_mutex             0.1                        main  
+# _openmp_mutex             4.5                       1_gnu  
 ansi2html                 1.5.2            py38h06a4308_0  
 attrs                     19.1.0                   pypi_0    pypi
 backcall                  0.2.0              pyhd3eb1b0_0  
