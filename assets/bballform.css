@@ -1,0 +1,29 @@
+.team_select_box_css {
+    color: #ACC2DC !important;
+    border-bottom: 3px dotted gold;
+    width: 500px;
+    padding: 5px;
+    font-size: 16px;
+    line-height: 1;
+    border: 0;
+    border-radius: 15px;
+    height: 78px;
+    /* background: url(http://cdn1.iconfinder.com/data/icons/cc_mono_icon_set/blacks/16x16/br_down.png) no-repeat right #ddd; */
+    -webkit-appearance: none;
+    background-position-x: 244px;
+}
+
+.period_select_box_css {
+    color: #ACC2DC !important;
+    border-bottom: 3px dotted gold;
+    width: 500px;
+    padding: 5px;
+    font-size: 16px;
+    line-height: 1;
+    border: 0;
+    border-radius: 15px;
+    height: 78px;
+
+    -webkit-appearance: none;
+    background-position-x: 244px;
+}
