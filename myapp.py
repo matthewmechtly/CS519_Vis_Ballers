@@ -16,7 +16,8 @@ app = dash.Dash(__name__)
 # df = pd.read_csv('https://gist.githubusercontent.com/chriddyp/5d1ea79569ed194d432e56108a04d188/raw/a9f9e8076b837d541398e999dcbac2b2826a81f8/gdp-life-exp-2007.csv')
 
 ### Real df (Saved to disk right now) ###
-sf = pd.read_csv('shots_fixed.csv')
+# sf = pd.read_csv('shots_fixed.csv')
+sf = pd.read_csv('https://raw.githubusercontent.com/sealneaward/nba-movement-data/master/data/shots/shots_fixed.csv')
 
 ### Data Manipulation for Display ###
 
