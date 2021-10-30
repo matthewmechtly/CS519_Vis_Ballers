@@ -2,10 +2,10 @@
 # visit http://127.0.0.1:8050/ in your web browser.
 
 import dash
-from dash import dcc
-from dash import html
-# import dash_core_components as dcc
-# import dash_html_components as html
+# from dash import dcc
+# from dash import html
+import dash_core_components as dcc
+import dash_html_components as html
 import dash_bootstrap_components as dbc
 import plotly.express as px
 import pandas as pd
@@ -86,8 +86,8 @@ app.layout = html.Div(
                 {'label': 'Golden State Warriors', 'value': 'Golden State Warriors'},
                 {'label': 'Houston Rockets', 'value': 'Houston Rockets'},
                 {'label': 'Indiana Pacers', 'value': 'Indiana Pacers'},
-                {'label': 'LA Clippers', 'value': 'LA Clippers'},
-                {'label': 'LA Lakers', 'value': 'Los Angeles Lakers'},
+                {'label': 'Los Angeles Clippers', 'value': 'LA Clippers'},
+                {'label': 'Los Angeles Lakers', 'value': 'Los Angeles Lakers'},
                 {'label': 'Memphis Grizzlies', 'value': 'Memphis Grizzlies'},
                 {'label': 'Miami Heat', 'value': 'Miami Heat'},
                 {'label': 'Milwaukee Bucks', 'value': 'Milwaukee Bucks'},
