@@ -289,11 +289,12 @@ def build_graph(team_list, period):
     )
 
     # Incorporate Image
-    img = Image.open('Basketball_Halfcourt3.png')
+    # img = Image.open('Basketball_Halfcourt3.png')
 
     fig.add_layout_image(
         dict(
-            source=img,
+            # source=img,
+            source='https://raw.githubusercontent.com/matthewmechtly/CS519_Vis_Ballers/main/Basketball_Halfcourt3.png',
             xref="x",
             yref="y",
             x=-250,
