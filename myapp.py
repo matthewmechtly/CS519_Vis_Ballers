@@ -9,14 +9,23 @@ import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
 import plotly.express as px
+import plotly.graph_objects as go
 import pandas as pd
+from PIL import Image
 
 app = dash.Dash(__name__)#,
                 # suppress_callback_exceptions=True)
 
 ### Real df (Saved to disk right now) ###
-sf = pd.read_csv('shots_fixed.csv')
-# sf = pd.read_csv('https://raw.githubusercontent.com/sealneaward/nba-movement-data/master/data/shots/shots_fixed.csv')
+# sf = pd.read_csv('shots_fixed.csv')
+sf = pd.read_csv('https://raw.githubusercontent.com/sealneaward/nba-movement-data/master/data/shots/shots_fixed.csv')
+
+
+
+# build team dictionary
+unique_teams = sorted(sf['TEAM_NAME'].unique())
+team_dict = [{'label': i, 'value': i} for i in unique_teams]
+
 
 ### Create Graph ##
 
@@ -46,13 +55,8 @@ def build_banner():
             )
         ]
     )
-    
-fig = px.scatter(sf,
-                 x="LOC_X", 
-                 y="LOC_Y",
-                 color="SHOT_MADE_FLAG",
-                 hover_name="PLAYER_NAME")
 
+fig = go.Figure()
 
 
 ### APP LAYOUT PORTION ###
@@ -103,6 +107,7 @@ def render_content(tab):
                 # div for left part of shooting tab
                 html.Div(
                     id='tab-1-left-part',
+                    className = 'six columns',
                     style={
                         'width':'30%',
                         'display':'inline-block'
@@ -111,48 +116,15 @@ def render_content(tab):
                         html.Label('Select Team:',
                             style={
                                 'textAlign': 'left',
-                                'font-size': 24,
-                                'margin-top': 20,
+                                'fontSize': 24,
+                                'marginTop': 20,
                             }
                         ),
 
                         dcc.Dropdown(
                             id='team-dropdown-id',
-                            options=[
-                                {'label': 'Atlanta Hawks', 'value': 'Atlanta Hawks'},
-                                {'label': 'Boston Celtics', 'value': 'Boston Celtics'},
-                                {'label': 'Brooklyn Nets', 'value': 'Brooklyn Nets'},
-                                {'label': 'Charlotte Hornets', 'value': 'Charlotte Hornets'},
-                                {'label': 'Chicago Bulls', 'value': 'Chicago Bulls'},
-                                {'label': 'Cleveland Cavaliers', 'value': 'Cleveland Cavaliers'},
-                                {'label': 'Dallas Mavericks', 'value': 'Dallas Mavericks'},
-                                {'label': 'Denver Nuggets', 'value': 'Denver Nuggets'},
-                                {'label': 'Detroit Pistons', 'value': 'Detroit Pistons'},
-                                {'label': 'Golden State Warriors', 'value': 'Golden State Warriors'},
-                                {'label': 'Houston Rockets', 'value': 'Houston Rockets'},
-                                {'label': 'Indiana Pacers', 'value': 'Indiana Pacers'},
-                                {'label': 'Los Angeles Clippers', 'value': 'LA Clippers'},
-                                {'label': 'Los Angeles Lakers', 'value': 'Los Angeles Lakers'},
-                                {'label': 'Memphis Grizzlies', 'value': 'Memphis Grizzlies'},
-                                {'label': 'Miami Heat', 'value': 'Miami Heat'},
-                                {'label': 'Milwaukee Bucks', 'value': 'Milwaukee Bucks'},
-                                {'label': 'Minnesota Timberwolves', 'value': 'Minnesota Timberwolves'},
-                                {'label': 'New Orleans Pelicans', 'value': 'New Orleans Pelicans'},
-                                {'label': 'New York Knicks', 'value': 'New York Knicks'},
-                                {'label': 'Oklahoma City Thunder', 'value': 'Oklahoma City Thunder'},
-                                {'label': 'Orlando Magic', 'value': 'Orlando Magic'},
-                                {'label': 'Philadelphia 76ers', 'value': 'Philadelphia 76ers'},
-                                {'label': 'Phoenix Suns', 'value': 'Phoenix Suns'},
-                                {'label': 'Portland Trail Blazers', 'value': 'Portland Trail Blazers'},
-                                {'label': 'Sacramento Kings', 'value': 'Sacramento Kings'},
-                                {'label': 'San Antonio Spurs', 'value': 'San Antonio Spurs'},
-                                {'label': 'Toronto Raptors', 'value': 'Toronto Raptors'},
-                                {'label': 'Utah Jazz', 'value': 'Utah Jazz'},
-                                {'label': 'Washington Wizards', 'value': 'Washington Wizards'}
-                            ],
-                            value=['Chicago Bulls',
-                                    'Detroit Pistons',
-                            ],
+                            options=team_dict,
+                            value=['Chicago Bulls','Detroit Pistons',],
                             multi=True,
                             searchable=True,
                             search_value='',
@@ -161,11 +133,31 @@ def render_content(tab):
                             className='team-select-box',
                         ),
 
+                        html.Label('Select Players:',
+                            style={
+                                'textAlign': 'left',
+                                'fontSize': 24,
+                                'marginTop': 20
+                            }
+                        ),
+
+                        dcc.Dropdown(
+                            id='player-selection',
+                            value=['Derrick Rose','Reggie Jackson'],
+                            multi=True,
+                            clearable=True,
+                            searchable=True,
+                            search_value='',
+                            placeholder='Select Players:',
+                            className='player-select-box',
+                        ),
+
                         html.Label('Select Period:',
                             style={
                                 'textAlign': 'left',
                                 'font-size': 24,
-                                'margin': 'auto'
+                                'margin': 'auto',
+                                'marginTop': 20
                             }
                         ),
 
@@ -196,7 +188,7 @@ def render_content(tab):
                         html.Div('_',
                             className='gap',
                             style={
-                                'marginTop':500,
+                                'marginTop':300,
                                 'color': bball_colors['page_background']
                             },
                             
@@ -214,8 +206,8 @@ def render_content(tab):
                         dcc.Graph(
                             id='shot-graph',
                             style={
-                                'height':800,
-                                'width':900,
+                                'height':750,
+                                'width':800,
                                 'float': 'right'
                             },
                             figure=fig
@@ -239,6 +231,8 @@ def render_content(tab):
 
 
 # == Shooting Callbacks == #
+
+# Simple callback demo that diplays the period selected
 @app.callback(
     Output('team-output-container', 'children'),
     [Input('period-slider', 'value')]
@@ -246,28 +240,72 @@ def render_content(tab):
 def update_output(value):
     return 'You have selected "{}"'.format(value)
 
+
+@app.callback(
+    Output('player-selection', 'options'),
+    [Input('team-dropdown-id', 'value')]
+)
+def update_player_list(team_list):
+    df = pd.DataFrame()
+    for i in team_list:
+        temp_df = sf[sf['TEAM_NAME'] == i]
+        df = df.append(temp_df)
+
+    unique_players = df['PLAYER_NAME'].unique()
+
+    return [{'label': i, 'value': i} for i in unique_players]
+
+
+# create shot graph from team and period selection
 @app.callback(
     Output('shot-graph', 'figure'),
-    [Input('team-dropdown-id', 'value'),
+    [Input('player-selection', 'value'),
      Input('period-slider', 'value')]
 )
 def build_graph(team_list, period):
     df = pd.DataFrame()
     for i in team_list:
-        temp_df = sf[sf['TEAM_NAME'] == i]
+        temp_df = sf[sf['PLAYER_NAME'] == i]
         df = df.append(temp_df)
     if (period != 5):
         df = df[df['PERIOD'] == period]
-    fig = px.scatter(df,
-                    x='LOC_X',
-                    y='LOC_Y',
-                    color="SHOT_MADE_FLAG",
-                    hover_name='PLAYER_NAME')
+
+    # make figure
+    fig = go.Figure(data=go.Scatter(
+                        x=df['LOC_X'],
+                        y=df['LOC_Y'],
+                        mode='markers',
+                        hovertext=df['PLAYER_NAME']
+                    )
+     )
+
+    fig.update_xaxes(range=[-300,300],showgrid=False, zeroline=False)
+    fig.update_yaxes(range=[-100,500],showgrid=False, zeroline=False)
+
     fig.update_layout(
         plot_bgcolor = bball_colors['content_background'],
         paper_bgcolor = bball_colors['content_background'],
         font_color = bball_colors['text']
     )
+
+    # Incorporate Image
+    img = Image.open('Basketball_Halfcourt3.png')
+
+    fig.add_layout_image(
+        dict(
+            source=img,
+            xref="x",
+            yref="y",
+            x=-250,
+            y=422.5,
+            sizex=500,
+            sizey=470,
+            sizing="stretch",
+            opacity=1.0,
+            layer="below")
+    )
+
+
     return fig
 
 # Run's program with "hot-reloading" (i.e. when changes are made, app restarts)

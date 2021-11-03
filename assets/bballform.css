@@ -161,6 +161,22 @@ in the following two repos:
     background-position-x: 244px;
 }
 
+.player-select-box {
+    background-color: #2d3038 !important;
+    color: #000000;
+    border-bottom: 3px dotted gold;
+    width: 500px;
+    padding: 5px;
+    font-size: 16px;
+    line-height: 1;
+    border: 0;
+    border-radius: 15px;
+    height: 78px;
+    /* background: url(http://cdn1.iconfinder.com/data/icons/cc_mono_icon_set/blacks/16x16/br_down.png) no-repeat right #ddd; */
+    -webkit-appearance: none;
+    background-position-x: 244px;
+}
+
 .period-select-box {
     color: #ACC2DC !important;
     border-bottom: 3px dotted gold;
