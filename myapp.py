@@ -294,17 +294,17 @@ def build_shot_matrix(team, shot_result, min_time = 0):
 
 @app.callback(
     Output('contours', 'figure'),
-    [Input('singleteam-dropdown-id', 'team')]
+    [Input('singleteam-dropdown-id', 'value')]
 )
-def build_contours(selected_team):
+def build_contours(team):
     '''
     Build our six contour plots for shots and misses based
     on the selected team
     '''
-    made = build_shot_matrix('Chicago Bulls', 'Made Shot')
-    made_end = build_shot_matrix('Chicago Bulls', 'Made Shot', min_time = 2580)
-    missed = build_shot_matrix('Chicago Bulls', 'Missed Shot')
-    missed_end = build_shot_matrix('Chicago Bulls', 'Missed Shot', min_time = 2580)
+    made = build_shot_matrix(team, 'Made Shot')
+    made_end = build_shot_matrix(team, 'Made Shot', min_time = 2580)
+    missed = build_shot_matrix(team, 'Missed Shot')
+    missed_end = build_shot_matrix(team, 'Missed Shot', min_time = 2580)
 
     plot_titles = [
         'Shots Made',
