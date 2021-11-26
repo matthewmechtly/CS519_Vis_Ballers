@@ -2,19 +2,14 @@
 # visit http://127.0.0.1:8050/ in your web browser.
 
 import dash
-# from dash import dcc
-# from dash import html
-from dash.dependencies import Input, Output
 import dash_core_components as dcc
 import dash_html_components as html
-import dash_bootstrap_components as dbc
-import plotly.express as px
-import plotly.graph_objects as go
 import pandas as pd
-from PIL import Image
+import plotly.graph_objects as go
+from dash.dependencies import Input, Output
+from plotly.subplots import make_subplots
 
-app = dash.Dash(__name__)#,
-                # suppress_callback_exceptions=True)
+app = dash.Dash(__name__, suppress_callback_exceptions=True)
 
 ### Real df (Saved to disk right now) ###
 # sf = pd.read_csv('shots_fixed.csv')
@@ -28,8 +23,6 @@ team_dict = [{'label': i, 'value': i} for i in unique_teams]
 
 
 ### Create Graph ##
-
-
 
 # Color Configurations
 bball_colors = {
@@ -58,7 +51,6 @@ def build_banner():
 
 fig = go.Figure()
 
-
 ### APP LAYOUT PORTION ###
 app.layout = html.Div(
     id='entire-app-container',
@@ -66,7 +58,7 @@ app.layout = html.Div(
         build_banner(),
         dcc.Tabs(
             id="custom-tabs-container",
-            value="shooting-tab",
+            value="make-miss-tab",
             className="custom-tabs",
             children=[
                 dcc.Tab(
@@ -77,9 +69,9 @@ app.layout = html.Div(
                     selected_className="custom-tab-selected",
                 ),
                 dcc.Tab(
-                    id="Movement-tab",
-                    label="Movement",
-                    value="movement-tab",
+                    id="make-miss-tab",
+                    label="Makes vs Misses",
+                    value="make-miss-tab",
                     className="custom-tab",
                     selected_className="custom-tab-selected",
                 ),
@@ -191,7 +183,7 @@ def render_content(tab):
                                 'marginTop':300,
                                 'color': bball_colors['page_background']
                             },
-                            
+
                         )
                     ]
                 ),
@@ -217,15 +209,37 @@ def render_content(tab):
             ]
         )
     # movement tab:
-    elif (tab == 'movement-tab'):
+    elif (tab == 'make-miss-tab'):
         return html.Div(
-            html.Label('Waiting for Movement Stuff...',
-                style={
-                    'textAlign': 'left',
-                    'font-size': 24,
-                    'padding': 20,
-                }
-            ),
+            style={
+                'padding': '1rem 2rem'
+            },
+            children =[
+                html.Div(
+                    style={ 'display': 'flex', 'justify-content': 'center' },
+                    children =[
+                        html.H5('Select a Team:', style={ 'margin-right': '1rem' }),
+                        dcc.Dropdown(
+                            id='singleteam-dropdown-id',
+                            options=team_dict,
+                            placeholder='Select Team:',
+                            searchable=False,
+                            clearable=False,
+                            value='Chicago Bulls',
+                            style={
+                                'margin-bottom': '1rem',
+                                'width': '30rem'
+                            }
+                        ),
+                    ]
+                ),
+                html.Div(
+                    style={ 'display': 'flex', 'justify-content': 'center' },
+                    children =[
+                        dcc.Graph(id="contours", style={ 'width':'1200px','height':'1200px' })
+                    ]
+                )
+            ]
         )
 
 
@@ -254,6 +268,47 @@ def update_player_list(team_list):
     unique_players = df['PLAYER_NAME'].unique()
 
     return [{'label': i, 'value': i} for i in unique_players]
+
+
+@app.callback(
+    Output('contours', 'figure'),
+    [Input('singleteam-dropdown-id', 'team')]
+)
+def build_contours(selected_team):
+    '''
+    Build our six contour plots for shots and misses based
+    on the selected team
+    '''
+    z = [[2, 4, 7, 12, 13, 14, 15, 16],
+         [3, 1, 6, 11, 12, 13, 16, 17],
+         [4, 2, 7, 7, 11, 14, 17, 18],
+         [5, 3, 8, 8, 13, 15, 18, 19],
+         [7, 4, 10, 9, 16, 18, 20, 19],
+         [9, 10, 5, 27, 23, 21, 21, 21],
+         [11, 14, 17, 26, 25, 24, 23, 22]]
+
+    plot_titles = [
+        'Shots Made When Within 5 Points',
+        'Shots Missed When Within 5 Points',
+        'Shots Made When Ahead >5 Points',
+        'Shots Missed When Ahead >5 Points',
+        'Shots Made When Down >5 Points',
+        'Shots Missed When Down >5 Points',
+    ]
+    contours = make_subplots(rows=3, cols=2, subplot_titles=plot_titles, vertical_spacing=0.05)
+    contours.add_trace(go.Contour(
+        z=z,
+        line_smoothing=1,
+        contours_coloring='heatmap',
+        colorscale='Hot',
+        line_width=0.1
+    ), 1, 1)
+    contours.add_trace(go.Contour(z=z, line_smoothing=0.85), 1, 2)
+    contours.add_trace(go.Contour(z=z, line_smoothing=0), 2, 1)
+    contours.add_trace(go.Contour(z=z, line_smoothing=0.85), 2, 2)
+    contours.add_trace(go.Contour(z=z, line_smoothing=0), 3, 1)
+    contours.add_trace(go.Contour(z=z, line_smoothing=0.85), 3, 2)
+    return contours
 
 
 # create shot graph from team and period selection
@@ -308,6 +363,8 @@ def build_graph(team_list, period):
 
 
     return fig
+
+
 
 # Run's program with "hot-reloading" (i.e. when changes are made, app restarts)
 if __name__ == '__main__':
