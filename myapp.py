@@ -5,6 +5,7 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import pandas as pd
+import numpy as np
 import plotly.graph_objects as go
 from dash.dependencies import Input, Output
 from plotly.subplots import make_subplots
@@ -236,7 +237,7 @@ def render_content(tab):
                 html.Div(
                     style={ 'display': 'flex', 'justify-content': 'center' },
                     children =[
-                        dcc.Graph(id="contours", style={ 'width':'1200px','height':'1200px' })
+                        dcc.Graph(id="contours", style={ 'width':'1200px','height':'900px' })
                     ]
                 )
             ]
@@ -270,6 +271,27 @@ def update_player_list(team_list):
     return [{'label': i, 'value': i} for i in unique_players]
 
 
+def build_shot_matrix(team, shot_result, min_time = 0):
+    '''
+    Build a 50x50 grid of the court and bin every
+    shot into one of the locations
+    @returns {np.matrix}
+    '''
+    grid_size = 25
+    court_width = 500
+
+    shot_matrix = np.zeros((grid_size,grid_size))
+    filtered = sf[(sf['TEAM_NAME'] == team) & (sf['EVENT_TYPE'] == shot_result) & (sf['SHOT_TIME'] * sf['PERIOD'] > min_time)]
+
+    for _, shot in filtered.iterrows():
+        x_bin = int((shot['LOC_X'] + court_width / 2) / (court_width / grid_size))
+        y_bin = int((shot['LOC_Y'] + 20) / (court_width / grid_size))
+        if x_bin >= grid_size or y_bin >= grid_size:
+            continue
+        shot_matrix[y_bin][x_bin] = shot_matrix[y_bin][x_bin] + 1
+
+    return shot_matrix
+
 @app.callback(
     Output('contours', 'figure'),
     [Input('singleteam-dropdown-id', 'team')]
@@ -279,35 +301,25 @@ def build_contours(selected_team):
     Build our six contour plots for shots and misses based
     on the selected team
     '''
-    z = [[2, 4, 7, 12, 13, 14, 15, 16],
-         [3, 1, 6, 11, 12, 13, 16, 17],
-         [4, 2, 7, 7, 11, 14, 17, 18],
-         [5, 3, 8, 8, 13, 15, 18, 19],
-         [7, 4, 10, 9, 16, 18, 20, 19],
-         [9, 10, 5, 27, 23, 21, 21, 21],
-         [11, 14, 17, 26, 25, 24, 23, 22]]
+    made = build_shot_matrix('Chicago Bulls', 'Made Shot')
+    made_end = build_shot_matrix('Chicago Bulls', 'Made Shot', min_time = 2580)
+    missed = build_shot_matrix('Chicago Bulls', 'Missed Shot')
+    missed_end = build_shot_matrix('Chicago Bulls', 'Missed Shot', min_time = 2580)
 
     plot_titles = [
-        'Shots Made When Within 5 Points',
-        'Shots Missed When Within 5 Points',
-        'Shots Made When Ahead >5 Points',
-        'Shots Missed When Ahead >5 Points',
-        'Shots Made When Down >5 Points',
-        'Shots Missed When Down >5 Points',
+        'Shots Made',
+        'Shots Missed',
+        'Shots Made (Final 5 Minutes)',
+        'Shots Missed (Final 5 Minutes)'
     ]
-    contours = make_subplots(rows=3, cols=2, subplot_titles=plot_titles, vertical_spacing=0.05)
-    contours.add_trace(go.Contour(
-        z=z,
-        line_smoothing=1,
-        contours_coloring='heatmap',
-        colorscale='Hot',
-        line_width=0.1
-    ), 1, 1)
-    contours.add_trace(go.Contour(z=z, line_smoothing=0.85), 1, 2)
-    contours.add_trace(go.Contour(z=z, line_smoothing=0), 2, 1)
-    contours.add_trace(go.Contour(z=z, line_smoothing=0.85), 2, 2)
-    contours.add_trace(go.Contour(z=z, line_smoothing=0), 3, 1)
-    contours.add_trace(go.Contour(z=z, line_smoothing=0.85), 3, 2)
+
+    colorscale = [[0, 'blue'], [0.5, 'yellow'], [1, 'red']]
+    contours = make_subplots(rows=2, cols=2, subplot_titles=plot_titles, vertical_spacing=0.1)
+    contours.add_trace(go.Contour(z=made, line_smoothing=1, showscale=False, contours_coloring='heatmap', colorscale=colorscale, line_width=0), 1, 1)
+    contours.add_trace(go.Contour(z=missed, line_smoothing=1, showscale=False, contours_coloring='heatmap', colorscale=colorscale, line_width=0), 1, 2)
+    contours.add_trace(go.Contour(z=made_end, line_smoothing=1, showscale=False, contours_coloring='heatmap', colorscale=colorscale, line_width=0), 2, 1)
+    contours.add_trace(go.Contour(z=missed_end, line_smoothing=1, showscale=False, contours_coloring='heatmap', colorscale=colorscale, line_width=0), 2, 2)
+
     return contours
 
 
