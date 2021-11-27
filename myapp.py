@@ -2,19 +2,15 @@
 # visit http://127.0.0.1:8050/ in your web browser.
 
 import dash
-# from dash import dcc
-# from dash import html
-from dash.dependencies import Input, Output
 import dash_core_components as dcc
 import dash_html_components as html
-import dash_bootstrap_components as dbc
-import plotly.express as px
-import plotly.graph_objects as go
 import pandas as pd
-from PIL import Image
+import numpy as np
+import plotly.graph_objects as go
+from dash.dependencies import Input, Output
+from plotly.subplots import make_subplots
 
-app = dash.Dash(__name__)#,
-                # suppress_callback_exceptions=True)
+app = dash.Dash(__name__, suppress_callback_exceptions=True)
 
 ### Real df (Saved to disk right now) ###
 # sf = pd.read_csv('shots_fixed.csv')
@@ -28,8 +24,6 @@ team_dict = [{'label': i, 'value': i} for i in unique_teams]
 
 
 ### Create Graph ##
-
-
 
 # Color Configurations
 bball_colors = {
@@ -58,7 +52,6 @@ def build_banner():
 
 fig = go.Figure()
 
-
 ### APP LAYOUT PORTION ###
 app.layout = html.Div(
     id='entire-app-container',
@@ -66,7 +59,7 @@ app.layout = html.Div(
         build_banner(),
         dcc.Tabs(
             id="custom-tabs-container",
-            value="shooting-tab",
+            value="make-miss-tab",
             className="custom-tabs",
             children=[
                 dcc.Tab(
@@ -77,9 +70,9 @@ app.layout = html.Div(
                     selected_className="custom-tab-selected",
                 ),
                 dcc.Tab(
-                    id="Movement-tab",
-                    label="Movement",
-                    value="movement-tab",
+                    id="make-miss-tab",
+                    label="Makes vs Misses",
+                    value="make-miss-tab",
                     className="custom-tab",
                     selected_className="custom-tab-selected",
                 ),
@@ -191,7 +184,7 @@ def render_content(tab):
                                 'marginTop':300,
                                 'color': bball_colors['page_background']
                             },
-                            
+
                         )
                     ]
                 ),
@@ -217,15 +210,37 @@ def render_content(tab):
             ]
         )
     # movement tab:
-    elif (tab == 'movement-tab'):
+    elif (tab == 'make-miss-tab'):
         return html.Div(
-            html.Label('Waiting for Movement Stuff...',
-                style={
-                    'textAlign': 'left',
-                    'font-size': 24,
-                    'padding': 20,
-                }
-            ),
+            style={
+                'padding': '1rem 2rem'
+            },
+            children =[
+                html.Div(
+                    style={ 'display': 'flex', 'justify-content': 'center' },
+                    children =[
+                        html.H5('Select a Team:', style={ 'margin-right': '1rem' }),
+                        dcc.Dropdown(
+                            id='singleteam-dropdown-id',
+                            options=team_dict,
+                            placeholder='Select Team:',
+                            searchable=False,
+                            clearable=False,
+                            value='Chicago Bulls',
+                            style={
+                                'margin-bottom': '1rem',
+                                'width': '30rem'
+                            }
+                        ),
+                    ]
+                ),
+                html.Div(
+                    style={ 'display': 'flex', 'justify-content': 'center' },
+                    children =[
+                        dcc.Graph(id="contours", style={ 'width':'1200px','height':'900px' })
+                    ]
+                )
+            ]
         )
 
 
@@ -254,6 +269,75 @@ def update_player_list(team_list):
     unique_players = df['PLAYER_NAME'].unique()
 
     return [{'label': i, 'value': i} for i in unique_players]
+
+
+def build_shot_matrix(team, shot_result, min_time = 0):
+    '''
+    Build a 50x50 grid of the court and bin every
+    shot into one of the locations
+    @returns {np.matrix}
+    '''
+    grid_size = 25
+    court_width = 500
+
+    shot_matrix = np.zeros((grid_size,grid_size))
+    filtered = sf[(sf['TEAM_NAME'] == team) & (sf['EVENT_TYPE'] == shot_result) & (sf['SHOT_TIME'] * sf['PERIOD'] > min_time)]
+
+    for _, shot in filtered.iterrows():
+        x_bin = int((shot['LOC_X'] + court_width / 2) / (court_width / grid_size))
+        y_bin = int((shot['LOC_Y'] + 50) / (court_width / grid_size))
+        if x_bin >= grid_size or y_bin >= grid_size:
+            continue
+        shot_matrix[y_bin][x_bin] = shot_matrix[y_bin][x_bin] + 1
+
+    return shot_matrix
+
+@app.callback(
+    Output('contours', 'figure'),
+    [Input('singleteam-dropdown-id', 'value')]
+)
+def build_contours(team):
+    '''
+    Build our six contour plots for shots and misses based
+    on the selected team
+    '''
+    made = build_shot_matrix(team, 'Made Shot')
+    made_end = build_shot_matrix(team, 'Made Shot', min_time = 2580)
+    missed = build_shot_matrix(team, 'Missed Shot')
+    missed_end = build_shot_matrix(team, 'Missed Shot', min_time = 2580)
+
+    plot_titles = [
+        'Shots Made',
+        'Shots Missed',
+        'Shots Made (Final 5 Minutes)',
+        'Shots Missed (Final 5 Minutes)'
+    ]
+
+    colorscale = [[0, 'blue'], [0.5, 'yellow'], [1, 'red']]
+    contours = make_subplots(rows=2, cols=2, subplot_titles=plot_titles, vertical_spacing=0.1)
+    contours.add_trace(go.Contour(z=made, line_smoothing=1, showscale=False, contours_coloring='heatmap', colorscale=colorscale, line_width=0), 1, 1)
+    contours.add_trace(go.Contour(z=missed, line_smoothing=1, showscale=False, contours_coloring='heatmap', colorscale=colorscale, line_width=0), 1, 2)
+    contours.add_trace(go.Contour(z=made_end, line_smoothing=1, showscale=False, contours_coloring='heatmap', colorscale=colorscale, line_width=0), 2, 1)
+    contours.add_trace(go.Contour(z=missed_end, line_smoothing=1, showscale=False, contours_coloring='heatmap', colorscale=colorscale, line_width=0), 2, 2)
+
+    for row in [1,2]:
+        for col in [1,2]:
+            contours.add_layout_image(
+                dict(
+                    # source=img,
+                    source='https://raw.githubusercontent.com/kruser/CS519_Vis_Ballers/contours/assets/images/half-court.png',
+                    xref="x",
+                    yref="y",
+                    x=-0.5,
+                    y=23,
+                    sizex=25,
+                    sizey=25,
+                    sizing="stretch",
+                    opacity=0.5,
+                    layer="above")
+            ,row=row,col=col)
+
+    return contours
 
 
 # create shot graph from team and period selection
@@ -308,6 +392,8 @@ def build_graph(team_list, period):
 
 
     return fig
+
+
 
 # Run's program with "hot-reloading" (i.e. when changes are made, app restarts)
 if __name__ == '__main__':

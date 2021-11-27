@@ -1,4 +1,3 @@
-
 /* Table of contents
 ––––––––––––––––––––––––––––––––––––––––––––––––––
 - Attribution
@@ -7,12 +6,11 @@
 - Modal
 - Tabs
 - Shooting Tab
-- Movement Tab
+- Makes-Misses Tab
 - Tables/Dropdown
 - Containers
 - Media Queries
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
-
 
 /* ATTRIBUTION
 
@@ -30,163 +28,159 @@ in the following two repos:
     'accent' : '#FA4F56',
     'background': '#3E464F', */
 
-
 /* ============ Overall ============ */
 
-    body {
-        background-color: #23262E;            
-        color: #95969A;
-        font-family: "Open Sans", sans-serif;
-        width: 100%;
-        height: 100vh;
-        max-width: 100% !important;
-        overflow-x: hidden;
-        margin: 0;
-      }
-      
-    #entire-app-container {
-        max-width: 100%;
-        align-items: center;
-      }
-      
+body {
+  background-color: #23262e;
+  color: #95969a;
+  font-family: "Open Sans", sans-serif;
+  width: 100%;
+  height: 100vh;
+  max-width: 100% !important;
+  overflow-x: hidden;
+  margin: 0;
+}
+
+#entire-app-container {
+  max-width: 100%;
+  align-items: center;
+}
+
 /* ============ BANNER ============ */
-  
-  .banner {
-    height: fit-content;
-    background-color: #23262E;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 2.5px solid #95969A;
-    padding: 0rem 6rem;
-    width: 100%;
-  }
-  
 
-  .banner h5 {
-    font-family: 'Open Sans Semi Bold', sans-serif;
-    font-weight: 500;
-    line-height: 1.2;
-    font-size: 2.5rem;
-    letter-spacing: 0.1rem;
-  }
-  
-  .banner h6 {
-    font-size: 1.9rem;
-    line-height: 1;
-  }
-  
-  /* ============ TABS ============ */
+.banner {
+  height: fit-content;
+  background-color: #23262e;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2.5px solid #95969a;
+  padding: 0rem 6rem;
+  width: 100%;
+}
 
-  #tabs {
-    
-    width: 80%;
-  }
-  
-  .custom-tabs {
-    background-color: #23262E;
-    text-transform: uppercase;
-    font-weight: 600;
-    font-size: 14px;
-    height: fit-content;
-    cursor: pointer;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    width: 94%;
-    margin-top: 2rem;
-  }
-  
-  #Shooting-tab.custom-tab, #Movement-tab.custom-tab {
-    background-color: #2d3038;
-    letter-spacing: 1px;
-    color: inherit;
-    border: 0;
-    border-bottom: #23262E solid 4px !important;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    height: 18px;
-    
-  }
-  
-  #Shooting-tab.custom-tab-selected, #Movement-tab.custom-tab-selected {
-    border-bottom: #FA4F56 solid 4px !important;
-    color : #FFFFFF;
-  }
-  
-  #Shooting-tab.custom-tab {
-    margin-right: 3px;
-  }
-  
-  #Control-chart-tab.custom-tab {
-    margin-left: 3px;
-  }
-  
-  .section-banner {
-    color: darkgray;
-    font-size: 1.5rem;
-    text-align: left;
-    padding: 1rem 2rem;
-    border-bottom: 1px solid #23262E;
-  }
+.banner h5 {
+  font-family: "Open Sans Semi Bold", sans-serif;
+  font-weight: 500;
+  line-height: 1.2;
+  font-size: 2.5rem;
+  letter-spacing: 0.1rem;
+}
+
+.banner h6 {
+  font-size: 1.9rem;
+  line-height: 1;
+}
+
+/* ============ TABS ============ */
+
+#tabs {
+  width: 80%;
+}
+
+.custom-tabs {
+  background-color: #23262e;
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: 14px;
+  height: fit-content;
+  cursor: pointer;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 94%;
+  margin-top: 2rem;
+}
+
+#Shooting-tab.custom-tab,
+#make-miss-tab.custom-tab {
+  background-color: #2d3038;
+  letter-spacing: 1px;
+  color: inherit;
+  border: 0;
+  border-bottom: #23262e solid 4px !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  height: 18px;
+}
+
+#Shooting-tab.custom-tab-selected,
+#make-miss-tab.custom-tab-selected {
+  border-bottom: #fa4f56 solid 4px !important;
+  color: #ffffff;
+}
+
+#Shooting-tab.custom-tab {
+  margin-right: 3px;
+}
+
+#Control-chart-tab.custom-tab {
+  margin-left: 3px;
+}
+
+.section-banner {
+  color: darkgray;
+  font-size: 1.5rem;
+  text-align: left;
+  padding: 1rem 2rem;
+  border-bottom: 1px solid #23262e;
+}
 
 #tab-1-right-part {
-    margin-top: 20px;
-    display:'block';
-    margin-left: 'auto';
-    margin-right: 'auto';
+  margin-top: 20px;
+  display: "block";
+  margin-left: "auto";
+  margin-right: "auto";
 }
-  
 
 /* ========== Containers ========== */
 
-
 .team-select-box {
-    background-color: #2d3038 !important;
-    color: #000000;
-    border-bottom: 3px dotted gold;
-    width: 500px;
-    padding: 5px;
-    font-size: 16px;
-    line-height: 1;
-    border: 0;
-    border-radius: 15px;
-    height: 78px;
-    /* background: url(http://cdn1.iconfinder.com/data/icons/cc_mono_icon_set/blacks/16x16/br_down.png) no-repeat right #ddd; */
-    -webkit-appearance: none;
-    background-position-x: 244px;
+  background-color: #2d3038 !important;
+  color: #000000;
+  border-bottom: 3px dotted gold;
+  width: 500px;
+  padding: 5px;
+  font-size: 16px;
+  line-height: 1;
+  border: 0;
+  border-radius: 15px;
+  height: 78px;
+  /* background: url(http://cdn1.iconfinder.com/data/icons/cc_mono_icon_set/blacks/16x16/br_down.png) no-repeat right #ddd; */
+  -webkit-appearance: none;
+  background-position-x: 244px;
 }
 
 .player-select-box {
-    background-color: #2d3038 !important;
-    color: #000000;
-    border-bottom: 3px dotted gold;
-    width: 500px;
-    padding: 5px;
-    font-size: 16px;
-    line-height: 1;
-    border: 0;
-    border-radius: 15px;
-    height: 78px;
-    /* background: url(http://cdn1.iconfinder.com/data/icons/cc_mono_icon_set/blacks/16x16/br_down.png) no-repeat right #ddd; */
-    -webkit-appearance: none;
-    background-position-x: 244px;
+  background-color: #2d3038 !important;
+  color: #000000;
+  border-bottom: 3px dotted gold;
+  width: 500px;
+  padding: 5px;
+  font-size: 16px;
+  line-height: 1;
+  border: 0;
+  border-radius: 15px;
+  height: 78px;
+  /* background: url(http://cdn1.iconfinder.com/data/icons/cc_mono_icon_set/blacks/16x16/br_down.png) no-repeat right #ddd; */
+  -webkit-appearance: none;
+  background-position-x: 244px;
 }
 
 .period-select-box {
-    color: #ACC2DC !important;
-    border-bottom: 3px dotted gold;
-    width: 500px;
-    padding: 5px;
-    font-size: 16px;
-    line-height: 1;
-    border: 0;
-    border-radius: 15px;
-    height: 78px;
-    -webkit-appearance: none;
-    background-position-x: 244px;
+  color: #acc2dc !important;
+  border-bottom: 3px dotted gold;
+  width: 500px;
+  padding: 5px;
+  font-size: 16px;
+  line-height: 1;
+  border: 0;
+  border-radius: 15px;
+  height: 78px;
+  -webkit-appearance: none;
+  background-position-x: 244px;
 }
