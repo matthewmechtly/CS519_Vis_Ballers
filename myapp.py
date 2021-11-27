@@ -326,7 +326,7 @@ def build_contours(team):
             source='https://raw.githubusercontent.com/kruser/CS519_Vis_Ballers/contours/assets/images/half-court.png',
             xref="x",
             yref="y",
-            x=0,
+            x=-1,
             y=25,
             sizex=25,
             sizey=25,
