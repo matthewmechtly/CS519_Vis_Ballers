@@ -285,7 +285,7 @@ def build_shot_matrix(team, shot_result, min_time = 0):
 
     for _, shot in filtered.iterrows():
         x_bin = int((shot['LOC_X'] + court_width / 2) / (court_width / grid_size))
-        y_bin = int((shot['LOC_Y'] + 20) / (court_width / grid_size))
+        y_bin = int((shot['LOC_Y'] + 25) / (court_width / grid_size))
         if x_bin >= grid_size or y_bin >= grid_size:
             continue
         shot_matrix[y_bin][x_bin] = shot_matrix[y_bin][x_bin] + 1
@@ -320,6 +320,20 @@ def build_contours(team):
     contours.add_trace(go.Contour(z=made_end, line_smoothing=1, showscale=False, contours_coloring='heatmap', colorscale=colorscale, line_width=0), 2, 1)
     contours.add_trace(go.Contour(z=missed_end, line_smoothing=1, showscale=False, contours_coloring='heatmap', colorscale=colorscale, line_width=0), 2, 2)
 
+    contours.add_layout_image(
+        dict(
+            # source=img,
+            source='https://raw.githubusercontent.com/matthewmechtly/CS519_Vis_Ballers/main/Basketball_Halfcourt3.png',
+            xref="x",
+            yref="y",
+            x=0,
+            y=25,
+            sizex=25,
+            sizey=25,
+            sizing="stretch",
+            opacity=0.5,
+            layer="above")
+    ,row=1,col=1)
     return contours
 
 
