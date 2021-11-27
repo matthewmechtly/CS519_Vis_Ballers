@@ -323,7 +323,7 @@ def build_contours(team):
     contours.add_layout_image(
         dict(
             # source=img,
-            source='https://raw.githubusercontent.com/matthewmechtly/CS519_Vis_Ballers/main/Basketball_Halfcourt3.png',
+            source='https://raw.githubusercontent.com/kruser/CS519_Vis_Ballers/contours/assets/images/half-court.png',
             xref="x",
             yref="y",
             x=0,
