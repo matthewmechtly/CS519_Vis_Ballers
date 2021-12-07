@@ -262,9 +262,12 @@ def update_output(value):
 )
 def update_player_list(team_list):
     df = pd.DataFrame()
-    for i in team_list:
-        temp_df = sf[sf['TEAM_NAME'] == i]
-        df = df.append(temp_df)
+    if team_list:
+        for i in team_list:
+            temp_df = sf[sf['TEAM_NAME'] == i]
+            df = df.append(temp_df)
+    else:
+        df = sf
 
     unique_players = df['PLAYER_NAME'].unique()
 
