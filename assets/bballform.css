@@ -94,7 +94,8 @@ body {
 }
 
 #Shooting-tab.custom-tab,
-#make-miss-tab.custom-tab {
+#make-miss-tab.custom-tab,
+#shot-polar-tab {
   background-color: #2d3038;
   letter-spacing: 1px;
   color: inherit;
@@ -109,7 +110,8 @@ body {
 }
 
 #Shooting-tab.custom-tab-selected,
-#make-miss-tab.custom-tab-selected {
+#make-miss-tab.custom-tab-selected,
+#shot-polar-tab.custom-tab-selected {
   border-bottom: #fa4f56 solid 4px !important;
   color: #ffffff;
 }

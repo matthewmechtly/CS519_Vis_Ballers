@@ -2,8 +2,10 @@
 # visit http://127.0.0.1:8050/ in your web browser.
 
 import dash
-import dash_core_components as dcc
-import dash_html_components as html
+# import dash_core_components as dcc
+from dash import dcc
+#import dash_html_components as html
+from dash import html
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
@@ -18,10 +20,11 @@ sf = pd.read_csv('https://raw.githubusercontent.com/sealneaward/nba-movement-dat
 
 
 
-# build team dictionary
+# build team and player dictionaries
 unique_teams = sorted(sf['TEAM_NAME'].unique())
 team_dict = [{'label': i, 'value': i} for i in unique_teams]
-
+unique_players = sorted(sf['PLAYER_NAME'].unique())
+player_dict = [{'label': i, 'value': sf['PLAYER_ID'][sf['PLAYER_NAME'] == i].to_list()[0]} for i in unique_players]
 
 ### Create Graph ##
 
@@ -73,6 +76,13 @@ app.layout = html.Div(
                     id="make-miss-tab",
                     label="Makes vs Misses",
                     value="make-miss-tab",
+                    className="custom-tab",
+                    selected_className="custom-tab-selected",
+                ),
+                dcc.Tab(
+                    id="shot-polar-tab",
+                    label="Player Skill by Shot Type",
+                    value="shot-polar-tab",
                     className="custom-tab",
                     selected_className="custom-tab-selected",
                 ),
@@ -242,6 +252,39 @@ def render_content(tab):
                 )
             ]
         )
+    elif (tab == 'shot-polar-tab'):
+        return html.Div(
+            style={
+                'padding': '1rem 2rem'
+            },
+            children =[
+                html.Div(
+                    style={ 'display': 'flex',
+                            'justify-content': 'center',
+                            'align-items': 'center'},
+                    children =[
+                        html.H5('Select Player:', style={ 'margin-right': '1rem' }),
+                        dcc.Dropdown(
+                            id='singleplayer-dropdown-id',
+                            options=player_dict,
+                            placeholder='Select Player:',
+                            searchable=True,
+                            clearable=True,
+                            value=None,
+                            style={
+                                'width': '20rem',
+                            }
+                        ),
+                    ]
+                ),
+                html.Div(
+                    style={'display': 'flex', 'justify-content': 'center'},
+                    children=[
+                        dcc.Graph(id="scatterpolar", style={'width': '800px', 'height': '800px'})
+                    ]
+                )
+            ]
+        )
 
 
 
@@ -396,7 +439,142 @@ def build_graph(team_list, period):
 
     return fig
 
+# create scatterpolar graph from player selection
+@app.callback(
+    Output('scatterpolar', 'figure'),
+    [Input('singleplayer-dropdown-id', 'value')]
+)
 
+def build_scatterpolar(player):
+
+    def group_shot_pct(df, by_player=None):
+        if by_player is not None:
+            df = df[(df["ACTION_TYPE"] != 'No Shot') &
+                    (df["PLAYER_ID"] == by_player)]
+        else:
+            df = df[(df["ACTION_TYPE"] != 'No Shot')]
+        return df.groupby(['ACTION_TYPE']).apply(
+            lambda x: x[x['EVENT_TYPE'] == 'Made Shot'].count() /
+                      (x[x['EVENT_TYPE'] == 'Made Shot'].count() + x[x['EVENT_TYPE'] == 'Missed Shot'].count())
+        )
+
+    def build_shot_type(df):
+        # Group Action Type into [Bank, Dunk, Hook, Jump, Layup]
+        for i, row in df.iterrows():
+            shot_type = row["ACTION_TYPE"]
+            if shot_type in (
+                    "Jump Bank Shot",
+                    "Pullup Bank shot",
+                    "Turnaround Bank shot",
+                    "Driving Bank shot",
+                    "Driving Floating Bank Jump Shot",
+                    "Step Back Bank Jump Shot",
+                    "Fadeaway Bank shot",
+                    "Hook Bank Shot",
+                    "Turnaround Fadeaway Bank Jump Shot"):
+                shot_type = "Bank"
+            elif shot_type in (
+                    "Dunk Shot",
+                    "Driving Dunk Shot",
+                    "Running Dunk Shot",
+                    "Alley Oop Dunk Shot",
+                    "Cutting Dunk Shot",
+                    "Putback Dunk Shot",
+                    "Tip Dunk Shot",
+                    "Driving Reverse Dunk Shot",
+                    "Running Alley Oop Dunk Shot",
+                    "Reverse Dunk Shot",
+                    "Running Reverse Dunk Shot"):
+                shot_type = "Dunk"
+            elif shot_type in (
+                    "Turnaround Fadeaway shot"):
+                shot_type = "Fadeaway"
+            elif shot_type in (
+                    "Hook Shot",
+                    "Turnaround Hook Shot",
+                    "Driving Hook Shot",
+                    "Turnaround Bank Hook Shot",
+                    "Driving Bank Hook Shot",
+                    "Running Hook Shot"):
+                shot_type = "Hook"
+            elif shot_type in (
+                    "Jump Shot",
+                    "Turnaround Jump Shot",
+                    "Running Pull-Up Jump Shot",
+                    "Step Back Jump shot",
+                    "Floating Jump shot",
+                    "Pullup Jump shot",
+                    "Fadeaway Jump Shot",
+                    "Running Jump Shot",
+                    "Driving Floating Jump Shot",
+                    "Driving Jump shot"):
+                shot_type = "Jump"
+            elif shot_type in (
+                    "Layup Shot",
+                    "Driving Layup Shot",
+                    "Running Layup Shot",
+                    "Running Reverse Layup Shot",
+                    "Tip Layup Shot",
+                    "Finger Roll Layup Shot",
+                    "Cutting Layup Shot",
+                    "Reverse Layup Shot",
+                    "Putback Layup Shot",
+                    "Driving Reverse Layup Shot",
+                    "Alley Oop Layup shot",
+                    "Driving Finger Roll Layup Shot",
+                    "Running Finger Roll Layup Shot",
+                    "Cutting Finger Roll Layup Shot",
+                    "Running Alley Oop Layup Shot"):
+                shot_type = "Layup"
+            else:
+                shot_type = "No Shot"
+            df.at[i, 'ACTION_TYPE'] = shot_type
+
+        return df
+
+    sf1 = build_shot_type(sf[['ACTION_TYPE', 'EVENT_TYPE', 'PLAYER_ID']])
+
+    theta = ['Bank', 'Dunk', 'Fadaway', 'Hook', 'Jump', 'Layup']
+
+    fig = go.Figure(data=go.Scatterpolar(
+            r=group_shot_pct(sf1, player)['ACTION_TYPE'].to_list(),
+            theta=theta,
+            fill='toself',
+            marker_color = 'pink',
+            opacity =1,
+            # hoverinfo = "text" ,
+            name = "Game",
+            text = 'The more coverage, the better the overall shot percentage'
+        ))
+
+    fig.update_layout(
+            polar=dict(
+                # hole=0.1,
+                # bgcolor="white",
+                radialaxis=dict(
+                    visible=True,
+                    type='linear',
+                    autotypenumbers='strict',
+                    autorange=False,
+                    range=[0, 1],
+                    angle=90,
+                    showline=False,
+                    showticklabels=False, ticks='',
+                    gridcolor='white'),
+                    ),
+            # width = 800,
+            # height = 800,
+            # margin=dict(l=150, r=150, t=20, b=20),
+            showlegend=False,
+            template="plotly_dark",
+            # plot_bgcolor = 'rgba(0, 0, 0, 0)',
+            plot_bgcolor = 'white',
+            paper_bgcolor = 'rgba(0, 0, 0, 0)',
+            font_color="white",
+            font_size= 28
+        )
+
+    return fig
 
 # Run's program with "hot-reloading" (i.e. when changes are made, app restarts)
 if __name__ == '__main__':
