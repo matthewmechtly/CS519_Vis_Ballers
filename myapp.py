@@ -18,13 +18,85 @@ app = dash.Dash(__name__, suppress_callback_exceptions=True)
 # sf = pd.read_csv('shots_fixed.csv')
 sf = pd.read_csv('https://raw.githubusercontent.com/sealneaward/nba-movement-data/master/data/shots/shots_fixed.csv')
 
-
-
 # build team and player dictionaries
 unique_teams = sorted(sf['TEAM_NAME'].unique())
 team_dict = [{'label': i, 'value': i} for i in unique_teams]
 unique_players = sorted(sf['PLAYER_NAME'].unique())
 player_dict = [{'label': i, 'value': sf['PLAYER_ID'][sf['PLAYER_NAME'] == i].to_list()[0]} for i in unique_players]
+
+# Filtered shot data for scatterpolar
+sf_sp = sf[['ACTION_TYPE', 'EVENT_TYPE', 'PLAYER_ID']]
+
+# Group Action Type into [Bank, Dunk, Hook, Jump, Layup]
+for i, row in sf_sp.iterrows():
+    shot_type = row["ACTION_TYPE"]
+    if shot_type in (
+            "Jump Bank Shot",
+            "Pullup Bank shot",
+            "Turnaround Bank shot",
+            "Driving Bank shot",
+            "Driving Floating Bank Jump Shot",
+            "Step Back Bank Jump Shot",
+            "Fadeaway Bank shot",
+            "Hook Bank Shot",
+            "Turnaround Fadeaway Bank Jump Shot"):
+        shot_type = "Bank"
+    elif shot_type in (
+            "Dunk Shot",
+            "Driving Dunk Shot",
+            "Running Dunk Shot",
+            "Alley Oop Dunk Shot",
+            "Cutting Dunk Shot",
+            "Putback Dunk Shot",
+            "Tip Dunk Shot",
+            "Driving Reverse Dunk Shot",
+            "Running Alley Oop Dunk Shot",
+            "Reverse Dunk Shot",
+            "Running Reverse Dunk Shot"):
+        shot_type = "Dunk"
+    elif shot_type in (
+            "Turnaround Fadeaway shot"):
+        shot_type = "Fadeaway"
+    elif shot_type in (
+            "Hook Shot",
+            "Turnaround Hook Shot",
+            "Driving Hook Shot",
+            "Turnaround Bank Hook Shot",
+            "Driving Bank Hook Shot",
+            "Running Hook Shot"):
+        shot_type = "Hook"
+    elif shot_type in (
+            "Jump Shot",
+            "Turnaround Jump Shot",
+            "Running Pull-Up Jump Shot",
+            "Step Back Jump shot",
+            "Floating Jump shot",
+            "Pullup Jump shot",
+            "Fadeaway Jump Shot",
+            "Running Jump Shot",
+            "Driving Floating Jump Shot",
+            "Driving Jump shot"):
+        shot_type = "Jump"
+    elif shot_type in (
+            "Layup Shot",
+            "Driving Layup Shot",
+            "Running Layup Shot",
+            "Running Reverse Layup Shot",
+            "Tip Layup Shot",
+            "Finger Roll Layup Shot",
+            "Cutting Layup Shot",
+            "Reverse Layup Shot",
+            "Putback Layup Shot",
+            "Driving Reverse Layup Shot",
+            "Alley Oop Layup shot",
+            "Driving Finger Roll Layup Shot",
+            "Running Finger Roll Layup Shot",
+            "Cutting Finger Roll Layup Shot",
+            "Running Alley Oop Layup Shot"):
+        shot_type = "Layup"
+    else:
+        shot_type = "No Shot"
+    sf_sp.at[i, 'ACTION_TYPE'] = shot_type
 
 ### Create Graph ##
 
@@ -458,99 +530,20 @@ def build_scatterpolar(player):
                       (x[x['EVENT_TYPE'] == 'Made Shot'].count() + x[x['EVENT_TYPE'] == 'Missed Shot'].count())
         )
 
-    def build_shot_type(df):
-        # Group Action Type into [Bank, Dunk, Hook, Jump, Layup]
-        for i, row in df.iterrows():
-            shot_type = row["ACTION_TYPE"]
-            if shot_type in (
-                    "Jump Bank Shot",
-                    "Pullup Bank shot",
-                    "Turnaround Bank shot",
-                    "Driving Bank shot",
-                    "Driving Floating Bank Jump Shot",
-                    "Step Back Bank Jump Shot",
-                    "Fadeaway Bank shot",
-                    "Hook Bank Shot",
-                    "Turnaround Fadeaway Bank Jump Shot"):
-                shot_type = "Bank"
-            elif shot_type in (
-                    "Dunk Shot",
-                    "Driving Dunk Shot",
-                    "Running Dunk Shot",
-                    "Alley Oop Dunk Shot",
-                    "Cutting Dunk Shot",
-                    "Putback Dunk Shot",
-                    "Tip Dunk Shot",
-                    "Driving Reverse Dunk Shot",
-                    "Running Alley Oop Dunk Shot",
-                    "Reverse Dunk Shot",
-                    "Running Reverse Dunk Shot"):
-                shot_type = "Dunk"
-            elif shot_type in (
-                    "Turnaround Fadeaway shot"):
-                shot_type = "Fadeaway"
-            elif shot_type in (
-                    "Hook Shot",
-                    "Turnaround Hook Shot",
-                    "Driving Hook Shot",
-                    "Turnaround Bank Hook Shot",
-                    "Driving Bank Hook Shot",
-                    "Running Hook Shot"):
-                shot_type = "Hook"
-            elif shot_type in (
-                    "Jump Shot",
-                    "Turnaround Jump Shot",
-                    "Running Pull-Up Jump Shot",
-                    "Step Back Jump shot",
-                    "Floating Jump shot",
-                    "Pullup Jump shot",
-                    "Fadeaway Jump Shot",
-                    "Running Jump Shot",
-                    "Driving Floating Jump Shot",
-                    "Driving Jump shot"):
-                shot_type = "Jump"
-            elif shot_type in (
-                    "Layup Shot",
-                    "Driving Layup Shot",
-                    "Running Layup Shot",
-                    "Running Reverse Layup Shot",
-                    "Tip Layup Shot",
-                    "Finger Roll Layup Shot",
-                    "Cutting Layup Shot",
-                    "Reverse Layup Shot",
-                    "Putback Layup Shot",
-                    "Driving Reverse Layup Shot",
-                    "Alley Oop Layup shot",
-                    "Driving Finger Roll Layup Shot",
-                    "Running Finger Roll Layup Shot",
-                    "Cutting Finger Roll Layup Shot",
-                    "Running Alley Oop Layup Shot"):
-                shot_type = "Layup"
-            else:
-                shot_type = "No Shot"
-            df.at[i, 'ACTION_TYPE'] = shot_type
-
-        return df
-
-    sf1 = build_shot_type(sf[['ACTION_TYPE', 'EVENT_TYPE', 'PLAYER_ID']])
-
     theta = ['Bank', 'Dunk', 'Fadaway', 'Hook', 'Jump', 'Layup']
 
     fig = go.Figure(data=go.Scatterpolar(
-            r=group_shot_pct(sf1, player)['ACTION_TYPE'].to_list(),
+            r=group_shot_pct(sf_sp, player)['ACTION_TYPE'].to_list(),
             theta=theta,
             fill='toself',
-            marker_color = 'pink',
+            marker_color = '#fa4f56',
             opacity =1,
-            # hoverinfo = "text" ,
             name = "Game",
             text = 'The more coverage, the better the overall shot percentage'
         ))
 
     fig.update_layout(
             polar=dict(
-                # hole=0.1,
-                # bgcolor="white",
                 radialaxis=dict(
                     visible=True,
                     type='linear',
@@ -562,16 +555,12 @@ def build_scatterpolar(player):
                     showticklabels=False, ticks='',
                     gridcolor='white'),
                     ),
-            # width = 800,
-            # height = 800,
-            # margin=dict(l=150, r=150, t=20, b=20),
             showlegend=False,
             template="plotly_dark",
-            # plot_bgcolor = 'rgba(0, 0, 0, 0)',
             plot_bgcolor = 'white',
             paper_bgcolor = 'rgba(0, 0, 0, 0)',
             font_color="white",
-            font_size= 28
+            font_size=28
         )
 
     return fig
