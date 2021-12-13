@@ -2,7 +2,7 @@
 ___
 ## Overview
 
-SportVU publicly released movement data for NBA players from the 2016-2017 season. We have taken this data--that was further aggregated and processed by Neil Seward--and created a trio of visualizations, accessible through Plotly's Dash framework. The three visualizaton tabs appear roughly as follows when the application is started: 
+SportVU publicly released movement data for NBA players from the 2015-2016 season. We have taken this data--that was further aggregated and processed by Neil Seward--and created a trio of visualizations, accessible through Plotly's Dash framework. The three visualizaton tabs appear roughly as follows when the application is started: 
 
 Tab 1:
 ![image](https://user-images.githubusercontent.com/52465651/145854286-0bcc204a-e0f4-4401-aab6-de7a5fe29d1a.png)
