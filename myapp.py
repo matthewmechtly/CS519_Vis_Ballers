@@ -139,21 +139,21 @@ app.layout = html.Div(
             children=[
                 dcc.Tab(
                     id="Shooting-tab",
-                    label="Shooting",
+                    label="Individual Shots",
                     value="shooting-tab",
                     className="custom-tab",
                     selected_className="custom-tab-selected",
                 ),
                 dcc.Tab(
                     id="make-miss-tab",
-                    label="Makes vs Misses",
+                    label="Make / Miss Heatmap",
                     value="make-miss-tab",
                     className="custom-tab",
                     selected_className="custom-tab-selected",
                 ),
                 dcc.Tab(
                     id="shot-polar-tab",
-                    label="Player Skill by Shot Type",
+                    label="Shooting Percent by Shot Type",
                     value="shot-polar-tab",
                     className="custom-tab",
                     selected_className="custom-tab-selected",
@@ -171,7 +171,7 @@ app.layout = html.Div(
 @app.callback(Output('tab-content', 'children'),
               Input('custom-tabs-container', 'value'))
 def render_content(tab):
-    # shooting tabs
+    # Individual Shots tab
     if (tab == 'shooting-tab'):
         return html.Div(
             id='tab-1-content',
@@ -253,12 +253,6 @@ def render_content(tab):
                             className='period-select-box'
                         ),
 
-                        html.Div(
-                            id='team-output-container',
-                            style={
-                                'textAlign':'left',
-                            }
-                        ),
 
                         html.Div('_',
                             className='gap',
@@ -291,7 +285,7 @@ def render_content(tab):
                 )
             ]
         )
-    # movement tab:
+    # Make / Miss Heatmap Tab
     elif (tab == 'make-miss-tab'):
         return html.Div(
             style={
@@ -324,6 +318,7 @@ def render_content(tab):
                 )
             ]
         )
+    # Shooting Percent by Shot Type Tab
     elif (tab == 'shot-polar-tab'):
         return html.Div(
             style={
@@ -361,15 +356,6 @@ def render_content(tab):
 
 
 # == Shooting Callbacks == #
-
-# Simple callback demo that diplays the period selected
-@app.callback(
-    Output('team-output-container', 'children'),
-    [Input('period-slider', 'value')]
-)
-def update_output(value):
-    return 'You have selected "{}"'.format(value)
-
 
 @app.callback(
     Output('player-selection', 'options'),
@@ -409,54 +395,6 @@ def build_shot_matrix(team, shot_result, min_time = 0):
         shot_matrix[y_bin][x_bin] = shot_matrix[y_bin][x_bin] + 1
 
     return shot_matrix
-
-@app.callback(
-    Output('contours', 'figure'),
-    [Input('singleteam-dropdown-id', 'value')]
-)
-def build_contours(team):
-    '''
-    Build our six contour plots for shots and misses based
-    on the selected team
-    '''
-    made = build_shot_matrix(team, 'Made Shot')
-    made_end = build_shot_matrix(team, 'Made Shot', min_time = 2580)
-    missed = build_shot_matrix(team, 'Missed Shot')
-    missed_end = build_shot_matrix(team, 'Missed Shot', min_time = 2580)
-
-    plot_titles = [
-        'Shots Made',
-        'Shots Missed',
-        'Shots Made (Final 5 Minutes)',
-        'Shots Missed (Final 5 Minutes)'
-    ]
-
-    colorscale = [[0, 'blue'], [0.5, 'yellow'], [1, 'red']]
-    contours = make_subplots(rows=2, cols=2, subplot_titles=plot_titles, vertical_spacing=0.1)
-    contours.add_trace(go.Contour(z=made, line_smoothing=1, showscale=False, contours_coloring='heatmap', colorscale=colorscale, line_width=0), 1, 1)
-    contours.add_trace(go.Contour(z=missed, line_smoothing=1, showscale=False, contours_coloring='heatmap', colorscale=colorscale, line_width=0), 1, 2)
-    contours.add_trace(go.Contour(z=made_end, line_smoothing=1, showscale=False, contours_coloring='heatmap', colorscale=colorscale, line_width=0), 2, 1)
-    contours.add_trace(go.Contour(z=missed_end, line_smoothing=1, showscale=False, contours_coloring='heatmap', colorscale=colorscale, line_width=0), 2, 2)
-
-    for row in [1,2]:
-        for col in [1,2]:
-            contours.add_layout_image(
-                dict(
-                    # source=img,
-                    source='https://raw.githubusercontent.com/kruser/CS519_Vis_Ballers/contours/assets/images/half-court.png',
-                    xref="x",
-                    yref="y",
-                    x=-0.5,
-                    y=23,
-                    sizex=25,
-                    sizey=25,
-                    sizing="stretch",
-                    opacity=0.5,
-                    layer="above")
-            ,row=row,col=col)
-
-    return contours
-
 
 # create shot graph from team and period selection
 @app.callback(
@@ -510,6 +448,62 @@ def build_graph(team_list, period):
 
 
     return fig
+
+
+@app.callback(
+    Output('contours', 'figure'),
+    [Input('singleteam-dropdown-id', 'value')]
+)
+def build_contours(team):
+    '''
+    Build our six contour plots for shots and misses based
+    on the selected team
+    '''
+    made = build_shot_matrix(team, 'Made Shot')
+    made_end = build_shot_matrix(team, 'Made Shot', min_time = 2580)
+    missed = build_shot_matrix(team, 'Missed Shot')
+    missed_end = build_shot_matrix(team, 'Missed Shot', min_time = 2580)
+
+    plot_titles = [
+        'Shots Made',
+        'Shots Missed',
+        'Shots Made (Final 5 Minutes)',
+        'Shots Missed (Final 5 Minutes)'
+    ]
+
+    colorscale = [[0, 'blue'], [0.5, 'yellow'], [1, 'red']]
+    contours = make_subplots(rows=2, cols=2, subplot_titles=plot_titles, vertical_spacing=0.1)
+    contours.add_trace(go.Contour(z=made, line_smoothing=1, showscale=False, contours_coloring='heatmap', colorscale=colorscale, line_width=0), 1, 1)
+    contours.add_trace(go.Contour(z=missed, line_smoothing=1, showscale=False, contours_coloring='heatmap', colorscale=colorscale, line_width=0), 1, 2)
+    contours.add_trace(go.Contour(z=made_end, line_smoothing=1, showscale=False, contours_coloring='heatmap', colorscale=colorscale, line_width=0), 2, 1)
+    contours.add_trace(go.Contour(z=missed_end, line_smoothing=1, showscale=False, contours_coloring='heatmap', colorscale=colorscale, line_width=0), 2, 2)
+
+    for row in [1,2]:
+        for col in [1,2]:
+            contours.add_layout_image(
+                dict(
+                    # source=img,
+                    source='https://raw.githubusercontent.com/kruser/CS519_Vis_Ballers/contours/assets/images/half-court.png',
+                    xref="x",
+                    yref="y",
+                    x=-0.5,
+                    y=23,
+                    sizex=25,
+                    sizey=25,
+                    sizing="stretch",
+                    opacity=0.5,
+                    layer="above")
+            ,row=row,col=col)
+
+    contours.update_layout(
+        plot_bgcolor = bball_colors['content_background'],
+        paper_bgcolor = bball_colors['content_background'],
+        font_color = "white"
+        # font_color = bball_colors['text']
+    )
+
+    return contours
+
 
 # create scatterpolar graph from player selection
 @app.callback(
