@@ -16,12 +16,13 @@ Tab 3:
 
 ## How to Install
 
-Clone the repo, then create a virtual env or conda environment using the `requirements.txt` file. Launch locally or wherever else desired
+This application is available to use with (very) limited resources at http://mmechtly.pythonanywhere.com. It will continue to be viewable until my free account expires.
+
+Alternatively, clone the repo, then create a virtual env or conda environment using the `requirements.txt` file. Launch locally or wherever else desired
 
 ## How to Use
 
 Cycle between the various 3 tabs by clicking on the tab names. On each tab, selections exists that can further filter what data to look at.
-
 
 ## Credits
 
