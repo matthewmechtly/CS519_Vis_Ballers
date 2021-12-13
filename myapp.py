@@ -8,6 +8,7 @@ from dash import dcc
 from dash import html
 import pandas as pd
 import numpy as np
+import plotly.express as px
 import plotly.graph_objects as go
 from dash.dependencies import Input, Output
 from plotly.subplots import make_subplots
@@ -139,7 +140,7 @@ app.layout = html.Div(
             children=[
                 dcc.Tab(
                     id="Shooting-tab",
-                    label="Individual Shots",
+                    label="Shot Selection",
                     value="shooting-tab",
                     className="custom-tab",
                     selected_className="custom-tab-selected",
@@ -402,22 +403,29 @@ def build_shot_matrix(team, shot_result, min_time = 0):
     [Input('player-selection', 'value'),
      Input('period-slider', 'value')]
 )
-def build_graph(team_list, period):
+def build_graph(player_list, period):
     df = pd.DataFrame()
-    for i in team_list:
+    for i in player_list:
         temp_df = sf[sf['PLAYER_NAME'] == i]
         df = df.append(temp_df)
     if (period != 5):
         df = df[df['PERIOD'] == period]
 
-    # make figure
-    fig = go.Figure(data=go.Scatter(
-                        x=df['LOC_X'],
-                        y=df['LOC_Y'],
-                        mode='markers',
-                        hovertext=df['PLAYER_NAME']
-                    )
-     )
+    # make figure - old
+    # fig = go.Figure(data=go.Scatter(
+    #                     x=df['LOC_X'],
+    #                     y=df['LOC_Y'],
+    #                     mode='markers',
+    #                     # hovertext=df['PLAYER_NAME'],
+    #                     marker_color=df['PLAYER_NAME']
+    #                     # color=player_list
+    #                 )
+    # )
+
+    fig = px.scatter(df,
+                     x='LOC_X',
+                     y='LOC_Y',
+                     color='PLAYER_NAME')
 
     fig.update_xaxes(range=[-300,300],showgrid=False, zeroline=False)
     fig.update_yaxes(range=[-100,500],showgrid=False, zeroline=False)
