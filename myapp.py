@@ -134,7 +134,7 @@ app.layout = html.Div(
         build_banner(),
         dcc.Tabs(
             id="custom-tabs-container",
-            value="make-miss-tab",
+            value="shooting-tab",
             className="custom-tabs",
             children=[
                 dcc.Tab(
