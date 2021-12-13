@@ -411,17 +411,6 @@ def build_graph(player_list, period):
     if (period != 5):
         df = df[df['PERIOD'] == period]
 
-    # make figure - old
-    # fig = go.Figure(data=go.Scatter(
-    #                     x=df['LOC_X'],
-    #                     y=df['LOC_Y'],
-    #                     mode='markers',
-    #                     # hovertext=df['PLAYER_NAME'],
-    #                     marker_color=df['PLAYER_NAME']
-    #                     # color=player_list
-    #                 )
-    # )
-
     fig = px.scatter(df,
                      x='LOC_X',
                      y='LOC_Y',
@@ -436,13 +425,10 @@ def build_graph(player_list, period):
         font_color = bball_colors['text']
     )
 
-    # Incorporate Image
-    # img = Image.open('Basketball_Halfcourt3.png')
-
     fig.add_layout_image(
         dict(
             # source=img,
-            source='https://raw.githubusercontent.com/matthewmechtly/CS519_Vis_Ballers/main/Basketball_Halfcourt3.png',
+            source='https://raw.githubusercontent.com/matthewmechtly/CS519_Vis_Ballers/main/assets/images/Basketball_Halfcourt3.png',
             xref="x",
             yref="y",
             x=-250,
